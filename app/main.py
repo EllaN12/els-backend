@@ -157,7 +157,7 @@ async def calculate_lead_strategy(
     leads_df = pd.read_json(data_json) 
     leads_scored_df = els.model_score_leads(
         data=leads_df,
-        model_path="app/models/xgb_model_tuned"
+        model_path="app/models/model_h2o_stacked_ensemble"
     )
     optimization_results = els.lead_score_strategy_optimization(
         leads_scored_df=leads_scored_df,
