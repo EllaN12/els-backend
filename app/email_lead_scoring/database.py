@@ -15,6 +15,8 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 BACKEND_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 DATABASE_DIR = os.path.join(os.path.dirname(CURRENT_DIR), 'database')
 DATABASE_PATH = os.path.join(DATABASE_DIR, 'crm_database.sqlite')
+output_dir = os.path.join(BACKEND_DIR, 'output')
+os.makedirs(output_dir, exist_ok=True)
 os.makedirs(DATABASE_DIR, exist_ok=True)
 CONN_STR = f"sqlite:///{DATABASE_PATH}"
 
@@ -117,10 +119,9 @@ def db_read_els_data(conn_str = CONN_STR):
 
 #%%
 subscribers_joined_df = db_read_els_data()
-## Turn to excel 
-path = "App/Output/subscribers.xlsx"
-data_path = os.path.abspath(path)
-subscribers_joined_df.to_excel(data_path, index=False)   
+## Turn to excel
+data_path = os.path.join(output_dir, "subscribers.xlsx")
+subscribers_joined_df.to_excel(data_path, index=False)
 
 
 def process_leads_tags(leads_df, tags_df):
