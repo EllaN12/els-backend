@@ -1,3 +1,5 @@
+
+#%%
 import pandas as pd
 import numpy as np
 import sqlalchemy as sql
@@ -6,6 +8,7 @@ import re
 import janitor as jn
 from app.email_lead_scoring.exploratory import explore_sales_by_category
 import os
+import pathlib
 
 # Set up database paths and connection string
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -109,7 +112,16 @@ def db_read_els_data(conn_str = CONN_STR):
         subscribers_joined_df['made_purchase'] = subscribers_joined_df['user_email'] \
             .isin(emails_made_purchase) \
             .astype('int')
-    return subscribers_joined_df    
+    return subscribers_joined_df 
+
+
+#%%
+subscribers_joined_df = db_read_els_data()
+## Turn to excel 
+path = "App/Output/subscribers.xlsx"
+data_path = os.path.abspath(path)
+subscribers_joined_df.to_excel(data_path, index=False)   
+
 
 def process_leads_tags(leads_df, tags_df):
     """
@@ -127,7 +139,7 @@ def process_leads_tags(leads_df, tags_df):
     leads_df['optin_days'] = (leads_df['optin_time'] - date_max).dt.days
     
     # Extract email provider
-    leads_df['email_provider'] = leads_df['user_email'].map(lambda x: x.split('@')[1])
+    leads_df['email_provider'] = leads_df['user_email'].map(lambda x: x.split('@')[1] if '@' in x else 'unknown')
     
     # Calculate tag count per day
     leads_df['tag_count_by_optin_day'] = leads_df['tag_count'] / abs(leads_df['optin_days'] - 1)

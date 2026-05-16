@@ -24,7 +24,7 @@ def lead_make_strategy(leads_scored_df, thresh = 0.99, for_marketing_team = Fals
     leads_ranked_df = leads_scored_small_df \
         .sort_values('lead_score', ascending = False) \
         .assign(rank = lambda x: np.arange(0, len(x['made_purchase'])) + 1 ) \
-        .assign(gain = lambda x: np.cumsum(x['made_purchase']) / np.sum(x['made_purchase']))
+        .assign(gain = lambda x: np.cumsum(x['made_purchase']) / max(np.sum(x['made_purchase']), 1))
         
     strategy_df = leads_ranked_df \
         .assign(category = lambda x: np.where(x['gain'] <= thresh, "Hot-Lead", "Cold-Lead"))
@@ -127,15 +127,15 @@ def lead_strategy_calc_expected_value(
         customer_conversion_rate * avg_customer_value * \
         sample_factor
         
-    missed_purchase_ratio = missed_purchases / (missed_purchases + made_purchases)
+    missed_purchase_ratio = missed_purchases / total_purchases if total_purchases > 0 else 0
     cost_missed_purchases = sales_per_email_sent * sales_emails_per_month * missed_purchase_ratio
 
     cost_hot_target_but_unsub = hot_lead_count * \
         sales_emails_per_month * unsub_rate_per_sales_email * \
         customer_conversion_rate * avg_customer_value * \
         sample_factor
-    
-    made_purchase_ratio = made_purchases / (missed_purchases + made_purchases)
+
+    made_purchase_ratio = made_purchases / total_purchases if total_purchases > 0 else 0
     savings_made_purchases = sales_per_email_sent * sales_emails_per_month * made_purchase_ratio
     
     # Calculate expected value and savings

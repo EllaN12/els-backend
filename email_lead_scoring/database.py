@@ -127,7 +127,7 @@ def process_leads_tags(leads_df, tags_df):
     leads_df['optin_days'] = (leads_df['optin_time'] - date_max).dt.days
     
     # Extract email provider
-    leads_df['email_provider'] = leads_df['user_email'].map(lambda x: x.split('@')[1])
+    leads_df['email_provider'] = leads_df['user_email'].map(lambda x: x.split('@')[1] if '@' in x else 'unknown')
     
     # Calculate tag count per day
     leads_df['tag_count_by_optin_day'] = leads_df['tag_count'] / abs(leads_df['optin_days'] - 1)

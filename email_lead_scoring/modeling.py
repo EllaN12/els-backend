@@ -41,7 +41,8 @@ def model_score_leads(
         raise ValueError("The model prediction output lacks a 'prediction_label' column.")
 
     # Calculate lead scores
-    predictions_df['lead_score'] = 1 - predictions_df['prediction_score']
+    # prediction_score is P(positive class = made_purchase), so higher = more likely to buy
+    predictions_df['lead_score'] = predictions_df['prediction_score']
 
     # Combine lead scores with original data
     leads_scored_df = pd.concat([predictions_df['lead_score'], data], axis=1)
