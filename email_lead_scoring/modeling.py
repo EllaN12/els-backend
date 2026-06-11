@@ -1,15 +1,22 @@
 import pandas as pd
 import pycaret.classification as clf
-import app.email_lead_scoring as els
+from functools import lru_cache
+from .database import db_read_and_process_els_data
 import numpy as np
 import mlflow
 
 # Load the leads data
-leads_df = els.db_read_and_process_els_data()
+leads_df = db_read_and_process_els_data()
+
+
+@lru_cache(maxsize=4)
+def _load_pycaret_model(model_path: str):
+    return clf.load_model(model_path)
+
 
 def model_score_leads(
     data,
-    model_path = "app/models/blended_models_final"
+    model_path = "models/blended_models_final"
 ):
     """
     Score leads using a pre-trained PyCaret model.
@@ -27,8 +34,8 @@ def model_score_leads(
     Raises:
         ValueError: If the model output lacks required columns.
     """
-    # Load the PyCaret model
-    mod = clf.load_model(model_path)
+    # Load the PyCaret model (cached after first request)
+    mod = _load_pycaret_model(model_path)
 
     # Generate predictions
     predictions_df = clf.predict_model(estimator=mod, data=data)

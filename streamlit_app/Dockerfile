@@ -21,7 +21,7 @@ EXPOSE 8501
 
 # Pass the backend API endpoint as an env var (override at deploy time).
 # The default uses the existing Cloud Run backend URL.
-ENV BACKEND_ENDPOINT=https://backend-els-720685387106.us-central1.run.app
+ENV BACKEND_ENDPOINT="https://backend-els-73ttnprkbq-uc.a.run.app"
 
 CMD ["sh", "-c", \
      "streamlit run app.py \

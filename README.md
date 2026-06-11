@@ -34,7 +34,7 @@ This project builds a full end-to-end **email lead scoring** system that:
 
 ## Data Sources
 
-**SQLite CRM database** (`app/database/crm_database.sqlite`) — 3 interconnected tables:
+**SQLite CRM database** (`database/crm_database.sqlite`) — 3 interconnected tables:
 
 | Table | Records | Key Attributes |
 |-------|---------|---------------|
@@ -252,7 +252,7 @@ source venv/bin/activate          # macOS / Linux
 pip install -r requirements.txt
 
 # 4. Run the FastAPI backend
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 
 # 5. Run the Streamlit frontend (separate terminal)
 cd venv/streamlit_app

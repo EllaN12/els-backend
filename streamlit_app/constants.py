@@ -1,8 +1,7 @@
 import os
 
-# Override at runtime via the BACKEND_ENDPOINT env var (set in Cloud Run).
-# Falls back to the existing deployed backend URL.
-ENDPOINT = os.environ.get(
-    "BACKEND_ENDPOINT",
-    "https://backend-els-720685387106.us-central1.run.app"
-)
+_DEFAULT_BACKEND = "https://backend-els-73ttnprkbq-uc.a.run.app"
+
+# Override at runtime via BACKEND_ENDPOINT (Cloud Run / docker -e).
+# Treat empty string as unset — Cloud Run may inject BACKEND_ENDPOINT= with no value.
+ENDPOINT = (os.environ.get("BACKEND_ENDPOINT") or _DEFAULT_BACKEND).rstrip("/")

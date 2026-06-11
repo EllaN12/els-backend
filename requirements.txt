@@ -16,6 +16,7 @@ plotly-resampler==0.10.0
 fastapi==0.110.2
 fastjsonschema==2.19.1
 xgboost==2.0.3
+lightgbm==4.3.0
 catboost==1.2.5
 imbalanced-learn==0.12.2
 scikit-learn==1.4.2

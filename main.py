@@ -10,7 +10,7 @@ import json
 from uvicorn import Config, Server
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
-import app.email_lead_scoring as els
+import email_lead_scoring as els
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -116,7 +116,7 @@ async def predict(request: Request):
     
     leads_scored_df = els.model_score_leads(
         data=leads_df,
-        model_path="models/model_h2o_stacked_ensemble"
+        model_path="models/blended_models_final"
     )
 
     scores = leads_scored_df[['lead_score']].to_dict()
@@ -157,7 +157,7 @@ async def calculate_lead_strategy(
     leads_df = pd.read_json(data_json) 
     leads_scored_df = els.model_score_leads(
         data=leads_df,
-        model_path="models/model_h2o_stacked_ensemble"
+        model_path="models/blended_models_final"
     )
     optimization_results = els.lead_score_strategy_optimization(
         leads_scored_df=leads_scored_df,

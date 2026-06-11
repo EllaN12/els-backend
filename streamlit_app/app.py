@@ -26,9 +26,14 @@ def load_data(file_path_or_buffer):
     return pd.read_csv(file_path_or_buffer)
 
 def run_analysis(full_data_json, monthly_sales_reduction_safe_guard, estimated_monthly_sales):
+    if not ENDPOINT:
+        raise ValueError(
+            "BACKEND_ENDPOINT is not set. Deploy with "
+            "--set-env-vars BACKEND_ENDPOINT=https://your-backend.run.app"
+        )
     with st.spinner("Lead scoring in progress. Almost done..."):
         res = requests.post(
-            url=f'{ENDPOINT}/calculate_lead_strategy',
+            url=f"{ENDPOINT}/calculate_lead_strategy",
             json=full_data_json,
             params={
                 'monthly_sales_reduction_safe_guard': float(monthly_sales_reduction_safe_guard),
@@ -101,8 +106,8 @@ def process_data(leads_df, file_source):
             except Exception as e:
                 st.error(f"An error occurred while processing the data: {str(e)}")
         else:
-            st.error("Request failed. Check server logs for details.")
-            st.write(f"Response Text: {res.text}")
+            st.error(f"Request failed ({res.status_code}). Backend error:")
+            st.code(res.text[:2000] if res.text else "(empty response)")
 
 if file_option == 'Use default leads.csv':
     resolved_total_path = os.path.join(_DATA_DIR, "leads.csv")

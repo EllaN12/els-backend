@@ -1,0 +1,29 @@
+# ── Backend build context (repo root) ────────────────────────────────────────
+# Keeps `gcloud builds submit` uploads small and the image lean.
+
+# VCS / editor / OS cruft
+.git
+.gitignore
+.vscode/
+.DS_Store
+**/.DS_Store
+
+# Python caches & local virtualenv
+__pycache__/
+**/__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Local run artifacts (not needed in the image)
+output/
+logs.log
+*.log
+
+# Frontend has its own build context under streamlit_app/
+streamlit_app/
+
+# Docs & binaries
+*.md
+*.pptx
+LICENSE

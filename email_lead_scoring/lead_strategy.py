@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import app.email_lead_scoring as els
 
 
 

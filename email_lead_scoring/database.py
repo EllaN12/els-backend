@@ -4,7 +4,7 @@ import sqlalchemy as sql
 from sqlalchemy import text
 import re
 import janitor as jn
-from app.email_lead_scoring.exploratory import explore_sales_by_category
+from .exploratory import explore_sales_by_category
 import os
 
 # Set up database paths and connection string
