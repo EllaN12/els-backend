@@ -180,33 +180,41 @@ EV = Sales Retained (Hot Leads) + Unsub Savings (Cold Leads) − Missed Sales (C
 ```
 els-backend/
 │
-├── app/
-│   ├── main.py                          # FastAPI application (6 REST endpoints)
-│   ├── database/
-│   │   └── crm_database.sqlite          # SQLite CRM database
-│   ├── models/                          # Trained model artifacts
-│   │   ├── pipeline_xgb.pkl             # Production XGBoost sklearn pipeline
-│   │   ├── xgb_model_tuned.pkl          # Tuned XGBoost (PyCaret)
-│   │   ├── blended_models_final.pkl     # Blended ensemble — used for strategy
-│   │   ├── model_h2o_stacked_ensemble/  # H2O AutoML model
-│   │   ├── ada_model_tuned.pkl
-│   │   └── catboost_model_tuned.pkl
-│   └── email_lead_scoring/              # Core analytics module
-│       ├── __init__.py
-│       ├── cost_calculations.py         # Cost simulation functions
-│       ├── database.py                  # ETL pipeline (db_read_and_process_els_data)
-│       ├── exploratory.py               # EDA helper functions
-│       ├── modeling.py                  # Model scoring + MLflow utilities
-│       └── lead_strategy.py             # Threshold optimisation + expected value
+├── main.py                              # FastAPI application (5 REST endpoints)
 │
-├── venv/
-│   └── streamlit_app/                   # Streamlit frontend
-│       ├── app.py                       # Main UI (file upload, analysis, download)
-│       ├── helpers.py                   # Lead strategy + plotting helpers
-│       └── constants.py                 # Backend endpoint config (env var)
+├── email_lead_scoring/                  # Core analytics package
+│   ├── __init__.py
+│   ├── cost_calculations.py             # Cost simulation functions
+│   ├── database.py                      # ETL pipeline (db_read_and_process_els_data)
+│   ├── exploratory.py                   # EDA helper functions
+│   ├── modeling.py                      # Model scoring (PyCaret, cached) + MLflow utilities
+│   └── lead_strategy.py                 # Threshold optimisation + expected value
 │
-├── requirements.txt                     # Python dependencies
-├── constants.py                         # Shared constants
+├── database/
+│   └── crm_database.sqlite              # SQLite CRM database
+│
+├── models/                              # Trained model artifacts
+│   ├── blended_models_final.pkl         # Blended ensemble — used by /predict & /calculate_lead_strategy
+│   ├── pipeline_xgb.pkl                 # XGBoost sklearn pipeline
+│   ├── xgb_model_tuned.pkl              # Tuned XGBoost (PyCaret)
+│   ├── catboost_model_tuned.pkl         # Tuned CatBoost (PyCaret)
+│   ├── ada_model_tuned.pkl              # Tuned AdaBoost (PyCaret)
+│   ├── best_model_0.pkl                 # Best single model
+│   └── model_h2o_stacked_ensemble/      # H2O AutoML model (not used by the API)
+│
+├── streamlit_app/                       # Streamlit frontend (separate Cloud Run service)
+│   ├── app.py                           # Main UI (file upload, analysis, download)
+│   ├── helpers.py                       # Lead strategy + plotting helpers
+│   ├── constants.py                     # Backend endpoint config (BACKEND_ENDPOINT env var)
+│   ├── data/
+│   │   └── leads.csv                    # Sample leads for the demo
+│   ├── requirements_streamlit.txt       # Frontend-only dependencies
+│   ├── Dockerfile                       # Frontend container
+│   └── cloudbuild.yaml                  # Cloud Build: build → push → deploy frontend
+│
+├── Dockerfile                           # Backend container (uvicorn main:app)
+├── .dockerignore                        # Backend build-context excludes
+├── requirements.txt                     # Backend Python dependencies
 ├── DEPLOY.md                            # Google Cloud Run deployment guide
 └── README.md
 ```
@@ -221,8 +229,7 @@ els-backend/
 | `GET` | `/docs` | Interactive Swagger UI |
 | `GET` | `/get_email_subscribers` | Return all subscribers from the database |
 | `POST` | `/data` | Data passthrough utility |
-| `POST` | `/predict` | Score leads using `xgb_model_tuned.pkl` |
-| `POST` | `/predict_xgb` | Score leads using `pipeline_xgb.pkl` (sklearn pipeline) |
+| `POST` | `/predict` | Score leads using `blended_models_final` |
 | `POST` | `/calculate_lead_strategy` | Full pipeline: score → optimise → return strategy, expected value, and threshold table |
 
 ---
@@ -240,7 +247,7 @@ els-backend/
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/EllaN12/Email-Lead-Scoring-Frontend.git
+git clone https://github.com/EllaN12/els-backend.git
 cd els-backend
 
 # 2. Create and activate a virtual environment
@@ -255,7 +262,8 @@ pip install -r requirements.txt
 uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 
 # 5. Run the Streamlit frontend (separate terminal)
-cd venv/streamlit_app
+cd streamlit_app
+pip install -r requirements_streamlit.txt
 streamlit run app.py
 ```
 
