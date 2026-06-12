@@ -76,8 +76,13 @@ Sanity-check the build locally:
 ```bash
 cd els-backend
 docker build -t backend-els .
-docker run -p 8080:8080 backend-els   # then open http://localhost:8080/docs
+docker run -p 8081:8080 backend-els   # then open http://localhost:8081/docs
 ```
+
+`-p 8081:8080` maps host port **8081** → container port **8080** (the container always
+listens on 8080). The host port is arbitrary — if 8080 is already in use locally, pick any
+free port (here 8081) and open the matching `http://localhost:<host-port>/docs`. This only
+affects local testing; Cloud Run still injects `$PORT` and routes to container port 8080.
 
 ✅ **Done when:** image builds and Swagger UI loads locally.
 
