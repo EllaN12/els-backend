@@ -8,7 +8,7 @@
 substitutions:
   _REGION: us-central1
   _SERVICE: frontend-els
-  _BACKEND_ENDPOINT: https://backend-els-73ttnprkbq-uc.a.run.app
+  _BACKEND_ENDPOINT: https://backend-els-710930172854.us-central1.run.app
 
 steps:
 

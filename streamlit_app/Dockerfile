@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements_streamlit.txt
 COPY app.py .
 COPY helpers.py .
 COPY constants.py .
+COPY .streamlit/ ./.streamlit/
 
 # Copy default leads data
 COPY data/ ./data/
@@ -21,7 +22,7 @@ EXPOSE 8501
 
 # Pass the backend API endpoint as an env var (override at deploy time).
 # The default uses the existing Cloud Run backend URL.
-ENV BACKEND_ENDPOINT="https://backend-els-73ttnprkbq-uc.a.run.app"
+ENV BACKEND_ENDPOINT=https://backend-els-710930172854.us-central1.run.app
 
 CMD ["sh", "-c", \
      "streamlit run app.py \

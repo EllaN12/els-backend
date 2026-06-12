@@ -1,4 +1,3 @@
-#%%
 import os
 import streamlit as st
 import requests
@@ -6,14 +5,12 @@ import pandas as pd
 from helpers import lead_plot_optim_thresh
 from constants import ENDPOINT
 
-# Resolve paths relative to this script's directory
 _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 _DATA_DIR = os.path.join(_SCRIPT_DIR, "data")
 
-
-
-st.set_page_config(page_title="Email Lead Scoring", page_icon="🚀")
+st.set_page_config(page_title="Email Lead Scoring", page_icon="🚀", layout="wide")
 st.title("Email Lead Scoring")
+st.caption(f"Backend: `{ENDPOINT}`")
 
 
 file_option = st.radio(
@@ -109,26 +106,29 @@ def process_data(leads_df, file_source):
             st.error(f"Request failed ({res.status_code}). Backend error:")
             st.code(res.text[:2000] if res.text else "(empty response)")
 
-if file_option == 'Use default leads.csv':
-    resolved_total_path = os.path.join(_DATA_DIR, "leads.csv")
-    leads_df = load_data(resolved_total_path)
-    st.write("Using the default leads.csv file")
-    process_data(leads_df, "default")
-else:
-    uploaded_file = st.file_uploader(
-        "Upload Email Subscribers File",
-        type=['csv'],
-        accept_multiple_files=False
-    )
-    if uploaded_file is not None:
-        leads_df = load_data(uploaded_file)
-        st.write("Using the uploaded file")
-        process_data(leads_df, "uploaded")
+try:
+    if file_option == "Use default leads.csv":
+        resolved_total_path = os.path.join(_DATA_DIR, "leads.csv")
+        with st.spinner("Loading leads.csv…"):
+            leads_df = load_data(resolved_total_path)
+        st.write(f"Using the default leads.csv file ({len(leads_df):,} rows)")
+        process_data(leads_df, "default")
     else:
-        st.warning("Please upload a file.")
-
-
-
+        uploaded_file = st.file_uploader(
+            "Upload Email Subscribers File",
+            type=["csv"],
+            accept_multiple_files=False,
+        )
+        if uploaded_file is not None:
+            with st.spinner("Loading uploaded file…"):
+                leads_df = load_data(uploaded_file)
+            st.write(f"Using the uploaded file ({len(leads_df):,} rows)")
+            process_data(leads_df, "uploaded")
+        else:
+            st.warning("Please upload a file.")
+except Exception as exc:
+    st.error("The app failed to load.")
+    st.exception(exc)
 
 
 # %%
