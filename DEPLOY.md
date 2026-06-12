@@ -87,7 +87,12 @@ docker run -p 8080:8080 backend-els   # then open http://localhost:8080/docs
 
 ```bash
 gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
+
+# Set your real project id ONCE, then reuse $PROJECT_ID in every command below.
+# Do NOT paste the literal "YOUR_PROJECT_ID" — that produces a gcr.io path that
+# doesn't exist and the deploy fails with "Image ... not found".
+export PROJECT_ID=your-real-project-id          # e.g. phrasal-aegis-499119-k0
+gcloud config set project "$PROJECT_ID"
 
 gcloud services enable \
   run.googleapis.com \
@@ -104,7 +109,7 @@ gcloud config set run/region us-central1
 ## Chunk 3 — Build + Push Backend Image (15 min)
 
 ```bash
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/backend-els .
+gcloud builds submit --tag gcr.io/$PROJECT_ID/backend-els .
 ```
 
 Heavy dependencies (pycaret, xgboost, catboost) make this the longest build — start it, let it run, watch progress in the Cloud Build console.
@@ -118,7 +123,7 @@ Heavy dependencies (pycaret, xgboost, catboost) make this the longest build — 
 ```bash
 # 2Gi memory required — pycaret + xgboost load at startup
 gcloud run deploy backend-els \
-  --image gcr.io/YOUR_PROJECT_ID/backend-els \
+  --image gcr.io/$PROJECT_ID/backend-els \
   --region us-central1 \
   --platform managed \
   --allow-unauthenticated \
@@ -149,10 +154,10 @@ The frontend reads the backend URL from the `BACKEND_ENDPOINT` env var (`streaml
 ```bash
 cd streamlit_app
 
-gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/frontend-els .
+gcloud builds submit --tag gcr.io/$PROJECT_ID/frontend-els .
 
 gcloud run deploy frontend-els \
-  --image gcr.io/YOUR_PROJECT_ID/frontend-els \
+  --image gcr.io/$PROJECT_ID/frontend-els \
   --region us-central1 \
   --platform managed \
   --allow-unauthenticated \
@@ -236,6 +241,7 @@ gcloud run services update-traffic backend-els \
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
+| `gcloud run deploy` fails: `Image 'gcr.io/YOUR_PROJECT_ID/backend-els' not found` | The literal `YOUR_PROJECT_ID` placeholder was pasted instead of the real id, and/or the image was never built | `export PROJECT_ID=<real-id>`, run `gcloud builds submit --tag gcr.io/$PROJECT_ID/backend-els .` first, then deploy with `--image gcr.io/$PROJECT_ID/backend-els` |
 | `gcloud builds submit` fails with 403 `storage.objects.get` on the `_cloudbuild` bucket | Newer projects run Cloud Build as the Compute Engine default SA, which lacks storage access | `gcloud projects add-iam-policy-binding PROJECT_ID --member=serviceAccount:PROJECT_NUMBER-compute@developer.gserviceaccount.com --role=roles/cloudbuild.builds.builder`, wait ~60s, retry |
 | Backend container fails to start | OOM loading pycaret/xgboost models | Confirm `--memory 2Gi`; check Cloud Logging for `Memory limit exceeded` |
 | 500 with `OSError: libgomp.so.1: cannot open shared object file` | lightgbm/xgboost need OpenMP, missing from `python:3.9-slim` | Add `RUN apt-get update && apt-get install -y libgomp1` to the Dockerfile, rebuild |
